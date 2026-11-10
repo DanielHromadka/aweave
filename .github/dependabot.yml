@@ -1,0 +1,14 @@
+# Monthly dependency updates, grouped into one PR per ecosystem so CI runs once. Every merge to main cuts a release.
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule: { interval: monthly }
+    groups:
+      all: { patterns: ['*'] }
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
+    groups:
+      all: { patterns: ['*'] }

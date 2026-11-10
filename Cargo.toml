@@ -1,0 +1,29 @@
+[package]
+name = "aweave"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+description = "Version control coordination for many AI agents working on one git repository at once"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/DanielHromadka/aweave"
+homepage = "https://aweave.pages.dev/"
+readme = "README.md"
+keywords = ["git", "vcs", "agents", "mcp", "ai"]
+categories = ["command-line-utilities", "development-tools"]
+exclude = ["website/", ".github/"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive", "env"] }
+globset = "0.4"
+rusqlite = { version = "0.40", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[dev-dependencies]
+tempfile = "3"

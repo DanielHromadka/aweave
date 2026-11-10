@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>aWeave: many agents, one repository, no pile-ups</title>
+    <meta
+      name="description"
+      content="aWeave coordinates AI agents working on one git repository at the same time: a workspace per agent, intents that surface overlaps before anyone writes conflicting code, an integration queue that keeps trunk green, provenance on every commit and an MCP server."
+    />
+    <meta property="og:title" content="aWeave: many agents, one repository, no pile-ups" />
+    <meta property="og:description" content="Workspaces, intents, an overlap radar and an integration queue for teams of AI agents. On top of git, with an MCP server." />
+    <meta property="og:image" content="img/icon.png" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5.3.0/index.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist-mono@5.3.0/index.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/regular/style.css" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="nav">
+      <div class="wrap nav-row">
+        <a class="brand" href="#top" aria-label="aWeave home">
+          <img src="img/icon.svg" width="28" height="28" alt="" />
+          <span>aWeave</span>
+        </a>
+        <nav aria-label="Sections">
+          <ul class="nav-links">
+            <li><a href="#how">How it works</a></li>
+            <li><a href="#radar">Overlaps</a></li>
+            <li><a href="#queue">Queue</a></li>
+            <li><a href="#mcp">MCP</a></li>
+            <li><a href="#roadmap">Road map</a></li>
+          </ul>
+        </nav>
+        <a class="nav-github" href="https://github.com/DanielHromadka/aweave" aria-label="aWeave on GitHub" title="Source code on GitHub">
+          <i class="ph ph-github-logo" aria-hidden="true"></i>
+        </a>
+        <a class="btn btn-primary btn-small" href="#install">
+          <i class="ph ph-terminal-window" aria-hidden="true"></i><span>Install</span>
+        </a>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- Hero: headline across, then the pitch beside real CLI output. -->
+      <section class="hero" id="top">
+        <div class="wrap hero-grid">
+          <h1>
+            Many agents. One repository.
+            <span>No pile-ups.</span>
+          </h1>
+          <div class="hero-copy">
+            <p class="lede">
+              aWeave gives every AI agent its own workspace, tells them about overlapping work <em>before</em> they write conflicting code, and
+              merges through a queue that keeps trunk green. On top of git, with an MCP server.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#install"><i class="ph ph-terminal-window" aria-hidden="true"></i><span>Install</span></a>
+              <a class="btn btn-ghost" href="https://github.com/DanielHromadka/aweave"><i class="ph ph-github-logo" aria-hidden="true"></i><span>Source on GitHub</span></a>
+            </div>
+            <p class="hero-note">Free and open source, GPL-3.0. macOS, Linux, Windows (experimental).</p>
+          </div>
+          <figure class="term hero-term" aria-label="Output of aweave status with three agents">
+            <div class="term-bar" aria-hidden="true"><span></span><span></span><span></span><b>~/shop</b></div>
+<pre><code><span class="c-mute">$</span> aweave status
+trunk main at f22b14d
+
+<span class="c-head">workspaces (3)</span>
+  auth-timeout      <span class="c-a1">claude-1</span>   +0 -0  1 changed
+  billing-vat       <span class="c-a2">codex-2</span>    +0 -0  1 changed
+  login-ratelimit   <span class="c-a3">claude-3</span>   +0 -0  0 changed
+
+<span class="c-head">intents (3)</span>
+  #1  auth-timeout     src/auth/session.rs
+  #2  login-ratelimit  src/auth
+  #3  billing-vat      src/billing
+
+<span class="c-head">overlaps (2)</span>
+  <span class="c-warn">! auth-timeout changed files login-ratelimit
+    intends to change: src/auth/session.rs</span>
+  <span class="c-warn">! auth-timeout and login-ratelimit intend to
+    change the same paths: src/auth/session.rs</span></code></pre>
+          </figure>
+        </div>
+      </section>
+
+      <section class="facts" aria-label="At a glance">
+        <div class="wrap facts-row">
+          <div><strong>0</strong><span>daemons: agents coordinate through one SQLite file</span></div>
+          <div><strong>3</strong><span>kinds of overlap, reported the moment they appear</span></div>
+          <div><strong>8</strong><span>MCP tools for Claude Code, Codex and Cursor</span></div>
+          <div><strong>100%</strong><span>git underneath: GitHub, CI and editors keep working</span></div>
+        </div>
+      </section>
+
+      <!-- Why: three short problems. -->
+      <section class="why reveal" id="why">
+        <div class="wrap">
+          <p class="eyebrow">Why</p>
+          <h2>Git was built for one person on one branch.</h2>
+          <p class="section-lead">Ten agents on one repository break its assumptions in three places at once.</p>
+          <div class="columns">
+            <article>
+              <i class="ph ph-arrows-in-line-horizontal" aria-hidden="true"></i>
+              <h3>They trip over each other</h3>
+              <p>One working copy per checkout. Agents overwrite each other's files and fight over <code>index.lock</code>.</p>
+            </article>
+            <article>
+              <i class="ph ph-hourglass-medium" aria-hidden="true"></i>
+              <h3>Conflicts arrive last</h3>
+              <p>Two agents spend an hour on the same function and find out at merge time. Nobody could say “I'm on it”.</p>
+            </article>
+            <article>
+              <i class="ph ph-question" aria-hidden="true"></i>
+              <h3>Trunk breaks, and nobody knows why</h3>
+              <p>The last merge lands on code nobody tested, and the commit names an author, not the agent or task behind it.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- How: four steps, each with the command. -->
+      <section class="how reveal" id="how">
+        <div class="wrap">
+          <p class="eyebrow">How it works</p>
+          <h2>Four commands an agent learns in a minute.</h2>
+          <ol class="steps">
+            <li class="step">
+              <span class="step-n">1</span>
+              <div>
+                <h3>A workspace per agent</h3>
+                <p>An isolated git worktree on its own branch, created in one command. aWeave recognises it from the current directory.</p>
+              </div>
+<pre class="code"><code><span class="c-mute">$</span> aweave --agent claude-1 ws new auth-timeout
+<span class="c-mute">.aweave/ws/auth-timeout</span></code></pre>
+            </li>
+            <li class="step">
+              <span class="step-n">2</span>
+              <div>
+                <h3>Say what you'll touch, first</h3>
+                <p>An intent names files, folders or globs. If another agent is already there, you hear it now, not at merge time.</p>
+              </div>
+<pre class="code"><code><span class="c-mute">$</span> aweave intent add "Rate-limit login" --scope src/auth
+intent #2 declared: src/auth
+<span class="c-warn">! auth-timeout and login-ratelimit intend to
+  change the same paths: src/auth/session.rs</span></code></pre>
+            </li>
+            <li class="step">
+              <span class="step-n">3</span>
+              <div>
+                <h3>Snapshot often</h3>
+                <p>Checkpoint commits carry the agent, workspace, task and intents as trailers. A crashed agent loses minutes, not hours.</p>
+              </div>
+<pre class="code"><code><span class="c-mute">$</span> aweave snapshot -m "Retry refresh" --task SHOP-142
+ec6487f7a0da Retry refresh</code></pre>
+            </li>
+            <li class="step">
+              <span class="step-n">4</span>
+              <div>
+                <h3>Propose, and let the queue merge</h3>
+                <p>Rebased onto trunk, verified, fast-forwarded. A conflict or a red test comes back to the agent; trunk does not move.</p>
+              </div>
+<pre class="code"><code><span class="c-mute">$</span> aweave propose
+<span class="c-ok">merged 1 commit(s) from auth-timeout into main</span>
+released intents #1</code></pre>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Radar: the three kinds of overlap. -->
+      <section class="radar reveal" id="radar">
+        <div class="wrap">
+          <p class="eyebrow">Overlap radar</p>
+          <h2>Every pair of agents, checked all the time.</h2>
+          <p class="section-lead">
+            <code>aweave status</code>, <code>aweave check</code> (exit code 2 for scripts) and every new intent compare what each workspace has changed with what every other one
+            intends to change.
+          </p>
+          <div class="kinds">
+            <article class="kind">
+              <span class="tag">intent / intent</span>
+              <h3>Two plans collide</h3>
+              <p>Both agents declared paths that overlap, even for files that do not exist yet. The cheapest moment to reschedule.</p>
+            </article>
+            <article class="kind">
+              <span class="tag">change / intent</span>
+              <h3>Someone is already in there</h3>
+              <p>One agent has edited files another one is about to work on. The second one should sync after the first merges.</p>
+            </article>
+            <article class="kind">
+              <span class="tag">change / change</span>
+              <h3>Both edited the same file</h3>
+              <p>Not necessarily a conflict yet, but the queue will tell. Semantic, per-function merge is next on the road map.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Queue: diagram beside the guarantees. -->
+      <section class="queue reveal" id="queue">
+        <div class="wrap split-grid">
+          <div class="split-copy">
+            <p class="eyebrow">Integration queue</p>
+            <h2>Trunk only moves to commits that passed.</h2>
+            <ul class="checks">
+              <li><i class="ph ph-queue" aria-hidden="true"></i><span><b>One at a time.</b> Proposals from parallel agents line up behind a file lock.</span></li>
+              <li><i class="ph ph-git-branch" aria-hidden="true"></i><span><b>Rebased in its own worktree,</b> so the agent's checkout is never touched mid-work.</span></li>
+              <li><i class="ph ph-check-circle" aria-hidden="true"></i><span><b>Your verify command</b> (<code>cargo test</code>, <code>npm test</code>, a linter) runs on the exact result.</span></li>
+              <li><i class="ph ph-lock-simple" aria-hidden="true"></i><span><b>Compare-and-swap on trunk.</b> If someone pushed meanwhile, nothing is overwritten.</span></li>
+            </ul>
+          </div>
+          <figure class="diagram" aria-label="Three workspaces enter the queue; each is rebased, verified and merged into trunk in turn">
+            <svg viewBox="0 0 560 300" role="img">
+              <defs>
+                <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0 0 L10 5 L0 10 z" class="d-arrow" />
+                </marker>
+              </defs>
+              <g class="d-lane">
+                <rect x="10" y="30" width="130" height="40" rx="10" />
+                <text x="75" y="55">auth-timeout</text>
+                <rect x="10" y="130" width="130" height="40" rx="10" />
+                <text x="75" y="155">billing-vat</text>
+                <rect x="10" y="230" width="130" height="40" rx="10" />
+                <text x="75" y="255">login-ratelimit</text>
+              </g>
+              <g class="d-flow">
+                <path d="M140 50 C190 50 190 150 220 150" marker-end="url(#arr)" />
+                <path d="M140 150 H220" marker-end="url(#arr)" />
+                <path d="M140 250 C190 250 190 150 220 150" marker-end="url(#arr)" />
+              </g>
+              <g class="d-stage">
+                <rect x="222" y="105" width="150" height="90" rx="14" />
+                <text x="297" y="135" class="d-strong">queue</text>
+                <text x="297" y="158">rebase · verify</text>
+                <text x="297" y="178">one at a time</text>
+              </g>
+              <g class="d-flow">
+                <path d="M372 150 H420" marker-end="url(#arr)" />
+              </g>
+              <g class="d-trunk">
+                <line x1="430" y1="40" x2="430" y2="260" />
+                <circle cx="430" cy="70" r="7" />
+                <circle cx="430" cy="150" r="7" />
+                <circle cx="430" cy="230" r="7" />
+                <text x="448" y="154" class="d-strong">trunk</text>
+                <text x="448" y="174">always green</text>
+              </g>
+            </svg>
+          </figure>
+        </div>
+      </section>
+
+      <!-- MCP: setup beside the tools. -->
+      <section class="mcp reveal" id="mcp">
+        <div class="wrap mcp-grid">
+          <div>
+            <p class="eyebrow">MCP server</p>
+            <h2>Agents use it as tools, not as text to parse.</h2>
+            <p class="section-lead">Start each agent in its own workspace with its own name. <code>aweave mcp</code> speaks MCP over stdio.</p>
+<pre class="code"><code><span class="c-mute">$</span> cd "$(aweave --agent backend-1 ws new backend-1)"
+<span class="c-mute">$</span> claude mcp add aweave -- aweave mcp --agent backend-1</code></pre>
+            <p class="note">
+              A prompt line that works well: “Before editing, call <code>aweave_intent_declare</code> for the files you will touch. If it reports overlaps, tell me instead of
+              editing. Snapshot after each step and finish with <code>aweave_propose</code>.”
+            </p>
+          </div>
+          <ul class="tools" aria-label="MCP tools">
+            <li><code>aweave_status</code><span>Workspaces, changes, intents, overlaps</span></li>
+            <li><code>aweave_workspace_create</code><span>Isolated workspace for a task</span></li>
+            <li><code>aweave_intent_declare</code><span>Claim paths, get overlaps back</span></li>
+            <li><code>aweave_intent_release</code><span>Drop a claim</span></li>
+            <li><code>aweave_snapshot</code><span>Checkpoint with provenance</span></li>
+            <li><code>aweave_sync</code><span>Rebase onto the current trunk</span></li>
+            <li><code>aweave_propose</code><span>Rebase, verify, merge</span></li>
+            <li><code>aweave_events</code><span>What happened since you last looked</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Provenance: the trailer block. -->
+      <section class="prov reveal" id="provenance">
+        <div class="wrap split-grid flip">
+          <figure class="term" aria-label="A commit message with aWeave trailers">
+            <div class="term-bar" aria-hidden="true"><span></span><span></span><span></span><b>git log -1 main</b></div>
+<pre><code>Retry session refresh once on timeout
+
+<span class="c-a1">Aweave-Agent:</span> claude-1
+<span class="c-a1">Aweave-Workspace:</span> auth-timeout
+<span class="c-a1">Aweave-Task:</span> SHOP-142
+<span class="c-a1">Aweave-Intents:</span> 1</code></pre>
+          </figure>
+          <div class="split-copy">
+            <p class="eyebrow">Provenance</p>
+            <h2>Every commit says which agent, and why.</h2>
+            <p class="section-lead">
+              Plain git trailers, so they survive every host and show up in <code>git log --grep</code>. The event log records the rest: who declared what, which
+              overlaps appeared, which proposals failed and with what output.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Road map. -->
+      <section class="roadmap reveal" id="roadmap">
+        <div class="wrap">
+          <p class="eyebrow">Road map</p>
+          <h2>Coordination first. A new version control core after.</h2>
+          <ol class="milestones">
+            <li class="done">
+              <span class="ms">M0 · available</span>
+              <h3>Coordination on top of git</h3>
+              <p>Workspaces, intents and the overlap radar, snapshots with trailers, the integration queue, the event log and the MCP server.</p>
+            </li>
+            <li>
+              <span class="ms">M1</span>
+              <h3>Semantic merge</h3>
+              <p>Diffs and conflicts per function and type with tree-sitter, so independent edits to one file merge on their own. Intents on symbols.</p>
+            </li>
+            <li>
+              <span class="ms">M2</span>
+              <h3>Signed provenance</h3>
+              <p>Model, tools and test results per change, signed. Revert everything one agent or task did in one command.</p>
+            </li>
+            <li>
+              <span class="ms">M3</span>
+              <h3>Own store and operation log</h3>
+              <p>Copy-on-write workspaces in milliseconds, conflicts as data, <code>undo</code> for any operation, a two-way bridge to git.</p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Install: command first, every build below. -->
+      <section class="install reveal" id="install">
+        <div class="wrap">
+          <div class="install-panel">
+            <img class="install-icon" src="img/icon.svg" width="112" height="112" alt="" />
+            <div class="install-main">
+              <h2>Get aWeave.</h2>
+              <p class="section-lead">One binary. Run <code>aweave init</code> in any git repository.</p>
+              <div class="copy-line">
+                <pre class="code"><code id="install-cmd">curl -fsSL https://aweave.pages.dev/install.sh | sh</code></pre>
+                <button class="btn btn-ghost btn-small" type="button" data-copy="install-cmd"><i class="ph ph-copy" aria-hidden="true"></i><span>Copy</span></button>
+              </div>
+              <p class="install-meta">The script picks the build for your system and checks its SHA-256. Or: <code>cargo install --git https://github.com/DanielHromadka/aweave</code></p>
+            </div>
+          </div>
+          <div class="builds">
+            <h3>All downloads <span id="release-version"></span></h3>
+            <ul class="build-list" id="build-list" aria-live="polite"></ul>
+            <p class="build-foot"><a href="https://github.com/DanielHromadka/aweave/releases/latest">Release notes</a></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap footer-row">
+        <a class="brand" href="#top"><img src="img/icon.svg" width="24" height="24" alt="" /><span>aWeave</span></a>
+        <ul class="footer-links">
+          <li><a href="https://github.com/DanielHromadka/aweave">GitHub</a></li>
+          <li><a href="https://github.com/DanielHromadka/aweave/blob/main/docs/design.md">Design</a></li>
+          <li><a href="https://github.com/DanielHromadka/aweave/issues">Issues</a></li>
+          <li><a href="https://github.com/DanielHromadka/aweave/releases">All releases</a></li>
+        </ul>
+        <p class="footer-note">Free software under the GPL-3.0. Git is a trademark of Software Freedom Conservancy; aWeave is not affiliated with it.</p>
+      </div>
+    </footer>
+
+    <script src="site.js" defer></script>
+  </body>
+</html>
